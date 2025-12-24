@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigationZiti"
+        android:icon="@drawable/ic_menu_ziti"
+        android:title="@string/ziti" />
+    <item
+        android:id="@+id/navigationDuanyu"
+        android:icon="@drawable/ic_menu_duanyu"
+        android:title="@string/duanyu" />
+    <item
+        android:id="@+id/navigationWode"
+        android:icon="@drawable/ic_menu_wode"
+        android:title="@string/wode" />
+</menu>
