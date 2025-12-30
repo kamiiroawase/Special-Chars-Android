@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">Special Chars</string>
+
+    <string name="ziti">Font</string>
+    <string name="duanyu">Phrase</string>
+    <string name="wode">Me</string>
+    <string name="zhuangshi">Decorate</string>
+    <string name="dianzhui">Embellish</string>
+    <string name="tuan">Pattern</string>
+    <string name="fenge">Divider</string>
+    <string name="fuhao">Symbol</string>
+    <string name="yanzi">Kaomoji</string>
+
+    <string name="yonghuxieyi">User Agreement</string>
+    <string name="yinsixieyi">Privacy Policy</string>
+    <string name="yijianfankui">Feedback</string>
+    <string name="dangqianbanben">Version</string>
+
+    <string name="lianxifangshi">E-mail</string>
+    <string name="lianxifangshi2">Enter a valid E-mail</string>
+    <string name="qingshurushoujihao">Please enter your E-mail</string>
+    <string name="fankuiyijian">Feedback</string>
+    <string name="fankuiyijian2">Please enter your feedback</string>
+    <string name="fankuiyijian3">Please enter your feedback</string>
+    <string name="lijitijiao">Submit</string>
+    <string name="tijiaochenggong">Successful</string>
+
+    <string name="fuzhichenggong">Copied</string>
+
+    <string name="shuruwenzijikeshengcheng">Enter text to generate~</string>
+    <string name="custom_font_0">"(｡･ω･｡)ﾉ♡→→ "</string>
+    <string name="custom_font_1">ദ്ദി˶•̀֊•́)✧</string>
+</resources>
