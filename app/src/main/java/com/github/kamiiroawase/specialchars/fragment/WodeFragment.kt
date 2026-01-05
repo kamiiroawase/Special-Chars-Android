@@ -36,8 +36,6 @@ class WodeFragment : BaseFragment() {
         setUpClickListener()
 
         setUpDangqianbanbenUI()
-
-        setStatusBarWrap(binding.statusBarWrap)
     }
 
     private fun setUpClickListener() {

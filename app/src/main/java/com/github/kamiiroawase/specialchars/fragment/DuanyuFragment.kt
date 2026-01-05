@@ -35,8 +35,6 @@ class DuanyuFragment : BaseFragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setUpViewpage2AndTabLayout()
-
-        setStatusBarWrap(binding.statusBarWrap)
     }
 
     private fun setUpViewpage2AndTabLayout() {

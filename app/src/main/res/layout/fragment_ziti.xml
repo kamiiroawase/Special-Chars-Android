@@ -3,19 +3,20 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="#FFEDED">
+    android:layout_height="match_parent">
 
     <LinearLayout
         android:id="@+id/header"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:paddingHorizontal="16dp"
         android:paddingTop="16dp"
         android:paddingBottom="24dp"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_max="488dp">
 
         <TextView
             android:id="@+id/statusBarWrap"
@@ -35,14 +36,16 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/custom_font_0"
-                android:textColor="#EE869B" />
+                android:textColor="#EE869B"
+                tools:ignore="TextContrastCheck" />
 
             <TextView
                 android:id="@+id/customFont1"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/custom_font_1"
-                android:textColor="#F8CDD5" />
+                android:textColor="#F8CDD5"
+                tools:ignore="TextContrastCheck" />
         </LinearLayout>
 
         <androidx.cardview.widget.CardView
@@ -69,18 +72,19 @@
                     android:hint="@string/shuruwenzijikeshengcheng"
                     android:inputType="text"
                     android:paddingHorizontal="12dp"
-                    android:paddingVertical="12dp"
+                    android:paddingVertical="14dp"
                     android:textColor="#000000"
                     tools:ignore="LabelFor" />
 
                 <ImageView
                     android:id="@+id/editTextZitiSubmit"
                     android:layout_width="42dp"
-                    android:paddingHorizontal="6dp"
                     android:layout_height="wrap_content"
                     android:adjustViewBounds="true"
                     android:contentDescription="@null"
-                    android:src="@drawable/ic_write" />
+                    android:paddingHorizontal="6dp"
+                    android:src="@drawable/ic_write"
+                    tools:ignore="ImageContrastCheck" />
             </LinearLayout>
         </androidx.cardview.widget.CardView>
     </LinearLayout>
@@ -107,7 +111,8 @@
             app:tabRippleColor="@null"
             app:tabSelectedTextColor="#FA678B"
             app:tabTextAppearance="@style/TabTextStyle"
-            app:tabTextColor="#7E7E7E" />
+            app:tabTextColor="#7E7E7E"
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <androidx.viewpager2.widget.ViewPager2
             android:id="@+id/viewPager2"

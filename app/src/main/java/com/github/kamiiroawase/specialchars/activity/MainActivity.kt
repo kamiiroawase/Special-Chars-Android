@@ -1,8 +1,10 @@
 package com.github.kamiiroawase.specialchars.activity
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
 import androidx.activity.OnBackPressedCallback
+import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.github.kamiiroawase.specialchars.R
@@ -42,6 +44,7 @@ class MainActivity : BaseActivity() {
 
             setUpFragments {
                 binding.root.visibility = View.VISIBLE
+                switchFragment(currentItemId, true)
             }
         } else {
             restoreFragments(savedInstanceState)
@@ -86,14 +89,10 @@ class MainActivity : BaseActivity() {
                 delay(100)
             }
 
-            currentItemId = R.id.navigationZiti
-
             val transaction = supportFragmentManager.beginTransaction()
 
-            fragments.forEach { (key: Int, value: Fragment) ->
-                if (key != currentItemId) {
-                    transaction.hide(value)
-                }
+            fragments.forEach { _, fragment ->
+                transaction.hide(fragment)
             }
 
             transaction.commitNowAllowingStateLoss()
@@ -125,19 +124,27 @@ class MainActivity : BaseActivity() {
         )
     }
 
-    private fun switchFragment(itemId: Int) {
-        if (itemId == currentItemId) return
+    private fun switchFragment(itemId: Int, force: Boolean = false) {
+        if (currentItemId != itemId || force) {
+            val transaction = supportFragmentManager.beginTransaction()
 
-        val showFragment = fragments[itemId] ?: return
-        val hideFragment = fragments[currentItemId]!!
+            if (!force) {
+                val hideFragment = fragments[currentItemId]!!
+                transaction.hide(hideFragment)
+            }
 
-        val transaction = supportFragmentManager.beginTransaction()
+            val showFragment = fragments[itemId]!!
+            transaction.show(showFragment)
 
-        transaction.hide(hideFragment)
-        transaction.show(showFragment)
+            transaction.commitAllowingStateLoss()
 
-        transaction.commitAllowingStateLoss()
+            currentItemId = itemId
+        }
 
-        currentItemId = itemId
+        if (currentItemId == R.id.navigationZiti) {
+            binding.root.setBackgroundColor("#FFEDED".toColorInt())
+        } else {
+            binding.root.setBackgroundColor(Color.TRANSPARENT)
+        }
     }
 }

@@ -72,7 +72,7 @@ class ZitiFragment : BaseFragment() {
 
         setUpClickListener()
 
-        setStatusBarWrap(binding.statusBarWrap)
+        binding.statusBarWrap.setStatusBarPadding()
     }
 
     private fun setUpClickListener() {

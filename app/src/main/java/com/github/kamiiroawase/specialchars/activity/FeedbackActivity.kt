@@ -1,10 +1,8 @@
 package com.github.kamiiroawase.specialchars.activity
 
 import android.os.Bundle
-import android.text.Editable
-import android.text.TextUtils
-import android.text.TextWatcher
 import android.widget.Toast
+import androidx.core.widget.doAfterTextChanged
 import com.github.kamiiroawase.specialchars.R
 import com.github.kamiiroawase.specialchars.databinding.ActivityFeedbackBinding
 
@@ -17,62 +15,43 @@ class FeedbackActivity : BaseActivity() {
         binding = ActivityFeedbackBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        setUpClickListener()
-        setUpEditTextChangedListener()
-
-        setStatusBarWrap(binding.statusBarWrap)
+        initView()
     }
 
-    private fun setUpEditTextChangedListener() {
-        binding.editTextFankuineirong.addTextChangedListener(object : TextWatcher {
-            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
-                //
-            }
-
-            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
-                //
-            }
-
-            override fun afterTextChanged(s: Editable) {
-                if (!TextUtils.isEmpty(s.toString())) {
-                    binding.num.text = s.length.toString()
-                }
-            }
-        })
+    private fun initView() {
+        setupEditTextChangedListener()
+        setupClickListener()
     }
 
-    private fun setUpClickListener() {
-        binding.submit.setOnClickListener {
-            if (binding.editTextShoujihao.text.isNullOrEmpty()) {
-                Toast.makeText(
-                    this,
-                    R.string.qingshurushoujihao,
-                    Toast.LENGTH_SHORT
-                ).show()
+    private fun setupEditTextChangedListener() {
+        binding.feedbackEditText.doAfterTextChanged { text ->
+            val count = text?.length ?: 0
+            binding.feedbackCountText.text = count.toString()
+        }
+    }
 
+    private fun setupClickListener() {
+        binding.submitButton.setOnClickListener {
+            if (binding.contactEditText.text.toString().trim().isEmpty()) {
+                showToast(R.string.fankuiyijian3)
                 return@setOnClickListener
             }
 
-            if (binding.editTextFankuineirong.text.isNullOrEmpty()) {
-                Toast.makeText(
-                    this,
-                    R.string.fankuiyijian3,
-                    Toast.LENGTH_SHORT
-                ).show()
-
+            if (binding.feedbackEditText.text.toString().trim().isEmpty()) {
+                showToast(R.string.fankuiyijian3)
                 return@setOnClickListener
             }
 
-            binding.num.text = "0"
-            binding.editTextFankuineirong.setText("")
+            binding.feedbackCountText.text = "0"
+            binding.feedbackEditText.setText("")
 
-            Toast.makeText(
-                this,
-                R.string.tijiaochenggong,
-                Toast.LENGTH_SHORT
-            ).show()
+            showToast(R.string.tijiaochenggong)
 
             finish()
         }
+    }
+
+    private fun showToast(resId: Int) {
+        Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
     }
 }
