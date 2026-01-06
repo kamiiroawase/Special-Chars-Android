@@ -10,7 +10,7 @@ class WebActivity : BaseActivity() {
     private lateinit var binding: ActivityWebBinding
 
     companion object {
-        private const val EXTRA_URL = "url"
+        const val EXTRA_URL = "url"
         private const val DEFAULT_URL = "https://www.irs.gov/"
     }
 

@@ -18,19 +18,24 @@ import kotlinx.coroutines.launch
 class MainActivity : BaseActivity() {
     private lateinit var binding: ActivityMainBinding
 
-    private lateinit var fragments: Map<Int, Fragment>
+    private lateinit var navFragments: Map<Int, Fragment>
 
-    private var currentItemId = R.id.navigationZiti
-    private var currentItemKey = "CURRENT_ITEM_ID"
+    private fun getFragmentByNavId(id: Int): Fragment = navFragments[id]
+        ?: error("Fragment not found for id=$id")
+
+    private var currentNavItemId = R.id.navigationZiti
 
     companion object {
-        var fragmentInitCount = 0
+        var initializedFragmentCount = 0
+        private var lastBackPressTimestamp = 0L
+        private const val EXIT_CONFIRM_INTERVAL = 2000L
+        private const val STATE_CURRENT_NAV_ITEM_ID = "CURRENT_ITEM_ID"
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putInt(currentItemKey, currentItemId)
+        outState.putInt(STATE_CURRENT_NAV_ITEM_ID, currentNavItemId)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -39,112 +44,122 @@ class MainActivity : BaseActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        if (savedInstanceState == null) {
-            binding.root.visibility = View.INVISIBLE
+        restoreSavedState(savedInstanceState)
+        initNavFragments(savedInstanceState != null)
+        setupBottomNavListener()
+        initBackPressHandler()
+    }
 
-            setUpFragments {
-                binding.root.visibility = View.VISIBLE
-                switchFragment(currentItemId, true)
-            }
-        } else {
-            restoreFragments(savedInstanceState)
+    private fun restoreSavedState(savedInstanceState: Bundle?) {
+        if (savedInstanceState != null) {
+            currentNavItemId =
+                savedInstanceState.getInt(STATE_CURRENT_NAV_ITEM_ID, R.id.navigationZiti)
+        }
+    }
+
+    private fun initNavFragments(isRestoring: Boolean) {
+        navFragments = mapOf(
+            R.id.navigationZiti to getNavFragment(R.id.navigationZiti) { ZitiFragment() },
+            R.id.navigationDuanyu to getNavFragment(R.id.navigationDuanyu) { DuanyuFragment() },
+            R.id.navigationWode to getNavFragment(R.id.navigationWode) { WodeFragment() }
+        )
+
+        if (!isRestoring) {
+            binding.root.visibility = View.INVISIBLE
         }
 
-        setUpItemSelectedListener()
 
+        lifecycleScope.launch {
+            while (initializedFragmentCount < 5) {
+                delay(100)
+            }
+
+            supportFragmentManager.beginTransaction().apply {
+                navFragments.forEach { _, fragment ->
+                    hide(fragment)
+                }
+
+                show(getFragmentByNavId(currentNavItemId))
+
+                commitNow()
+            }
+
+            updateRootBackgroundColor()
+
+            if (isRestoring) {
+                binding.bottomNav.selectedItemId = currentNavItemId
+            } else {
+                binding.root.visibility = View.VISIBLE
+            }
+        }
+    }
+
+    private fun setupBottomNavListener() {
+        binding.bottomNav.setOnItemSelectedListener { item ->
+            switchNavFragment(item.itemId)
+            true
+        }
+    }
+
+    private fun initBackPressHandler() {
         onBackPressedDispatcher.addCallback(
             this,
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
-                    moveTaskToBack(true)
+                    val currentTime = System.currentTimeMillis()
+                    if (currentTime - lastBackPressTimestamp >= EXIT_CONFIRM_INTERVAL) {
+                        lastBackPressTimestamp = currentTime
+                        showToast(R.string.zaianyicituichuyingyong)
+                    } else {
+                        finish()
+                    }
                 }
             }
         )
     }
 
-    private fun setUpItemSelectedListener() {
-        binding.bottomNav.setOnItemSelectedListener { item ->
-            switchFragment(item.itemId)
-            true
-        }
-    }
-
-    private fun setUpFragments(callback: (() -> Unit)? = null) {
-        fragments = mapOf(
-            R.id.navigationZiti to ZitiFragment(),
-            R.id.navigationDuanyu to DuanyuFragment(),
-            R.id.navigationWode to WodeFragment()
-        )
-
-        val transaction = supportFragmentManager.beginTransaction()
-
-        fragments.forEach { (key: Int, value: Fragment) ->
-            transaction.add(R.id.navHostFragment, value, key.toString())
-        }
-
-        transaction.commitNowAllowingStateLoss()
-
-        lifecycleScope.launch {
-            while (fragmentInitCount < 5) {
-                delay(100)
+    private fun switchNavFragment(itemId: Int) {
+        if (currentNavItemId != itemId) {
+            supportFragmentManager.beginTransaction().apply {
+                hide(getFragmentByNavId(currentNavItemId))
+                show(getFragmentByNavId(itemId))
+                commitNow()
             }
 
-            val transaction = supportFragmentManager.beginTransaction()
-
-            fragments.forEach { _, fragment ->
-                transaction.hide(fragment)
-            }
-
-            transaction.commitNowAllowingStateLoss()
-
-            callback?.invoke()
-        }
-    }
-
-    private fun restoreFragments(savedInstanceState: Bundle) {
-        currentItemId = savedInstanceState.getInt(currentItemKey, R.id.navigationZiti)
-
-        val zitiFragment = supportFragmentManager
-            .findFragmentByTag(R.id.navigationZiti.toString())
-                as? ZitiFragment
-            ?: ZitiFragment()
-        val duanyuFragment = supportFragmentManager
-            .findFragmentByTag(R.id.navigationDuanyu.toString())
-                as? DuanyuFragment
-            ?: DuanyuFragment()
-        val wodeFragment = supportFragmentManager
-            .findFragmentByTag(R.id.navigationWode.toString())
-                as? WodeFragment
-            ?: WodeFragment()
-
-        fragments = mapOf(
-            R.id.navigationZiti to zitiFragment,
-            R.id.navigationDuanyu to duanyuFragment,
-            R.id.navigationWode to wodeFragment
-        )
-    }
-
-    private fun switchFragment(itemId: Int, force: Boolean = false) {
-        if (currentItemId != itemId || force) {
-            val transaction = supportFragmentManager.beginTransaction()
-
-            if (!force) {
-                val hideFragment = fragments[currentItemId]!!
-                transaction.hide(hideFragment)
-            }
-
-            val showFragment = fragments[itemId]!!
-            transaction.show(showFragment)
-
-            transaction.commitAllowingStateLoss()
-
-            currentItemId = itemId
+            currentNavItemId = itemId
         }
 
-        if (currentItemId == R.id.navigationZiti) {
-            binding.root.setBackgroundColor("#FFEDED".toColorInt())
+        updateRootBackgroundColor()
+    }
+
+    private inline fun <reified T : Fragment> getNavFragment(
+        id: Int,
+        noinline factory: () -> T
+    ): T {
+        val existingFragment = supportFragmentManager
+            .findFragmentByTag(id.toString())
+
+        return if (existingFragment == null) {
+            val newFragment = factory()
+
+            supportFragmentManager.beginTransaction().apply {
+                add(R.id.navHostFragment, newFragment, id.toString())
+                commitNow()
+            }
+
+            newFragment
         } else {
-            binding.root.setBackgroundColor(Color.TRANSPARENT)
+            existingFragment as T
         }
+    }
+
+    private fun updateRootBackgroundColor() {
+        val color = if (currentNavItemId == R.id.navigationZiti) {
+            "#FFEDED".toColorInt()
+        } else {
+            Color.TRANSPARENT
+        }
+
+        binding.root.setBackgroundColor(color)
     }
 }

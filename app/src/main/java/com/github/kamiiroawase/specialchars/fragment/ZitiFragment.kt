@@ -6,7 +6,6 @@ import android.content.ClipboardManager
 import android.content.Context
 import android.graphics.Typeface
 import android.os.Bundle
-import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,32 +14,26 @@ import android.widget.TextView
 import android.widget.Toast
 import androidx.core.graphics.toColorInt
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.github.kamiiroawase.specialchars.R
 import com.github.kamiiroawase.specialchars.databinding.FragmentZitiBinding
+import com.github.kamiiroawase.specialchars.viewmodel.ZitiFragmentViewModel
 import com.github.kamiiroawase.specialchars.viewpage.ziti.DianzhuiListFragment
 import com.github.kamiiroawase.specialchars.viewpage.ziti.ZhuangshiListFragment
-import com.github.kamiiroawase.specialchars.viewpage.ziti.ZitiliebiaoFragment
+import kotlinx.coroutines.launch
+import kotlin.getValue
 
 class ZitiFragment : BaseFragment() {
     private var _binding: FragmentZitiBinding? = null
     private val binding get() = _binding!!
 
-    var fontListAdapter: FontListAdapter<Font.Item2>? = null
-
-    var chineseListAdapter: FontListAdapter<Font.Item1>? = null
-
-    var decorationListAdapter: FontListAdapter<Font.Item1>? = null
-
-    companion object {
-        private var INSTANCE: ZitiFragment? = null
-
-        fun getInstance(): ZitiFragment? {
-            return INSTANCE
-        }
-    }
+    private val viewModel: ZitiFragmentViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -49,39 +42,26 @@ class ZitiFragment : BaseFragment() {
     ): View {
         _binding = FragmentZitiBinding.inflate(inflater, container, false)
 
-        INSTANCE = this
-
         return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
 
-        decorationListAdapter = null
-        chineseListAdapter = null
-        fontListAdapter = null
-
-        INSTANCE = null
         _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setUpViewpage2AndTabLayout()
+        initView()
 
-        setUpClickListener()
+        setupClickListener()
 
-        binding.statusBarWrap.setStatusBarPadding()
+        observeEvents()
     }
 
-    private fun setUpClickListener() {
-        binding.editTextZitiSubmit.setOnClickListener {
-            editTextZitiChanged(binding.editTextZiti.text.toString())
-        }
-    }
-
-    private fun setUpViewpage2AndTabLayout() {
+    private fun initView() {
         val tabs = listOf(
             getString(R.string.zhuangshi),
             getString(R.string.dianzhui)
@@ -98,33 +78,25 @@ class ZitiFragment : BaseFragment() {
         }.attach()
     }
 
-    fun editTextZitiChanged(text: String) {
-        if (TextUtils.isEmpty(text)) {
-            binding.customFont0.setTextColor("#EE869B".toColorInt())
-            binding.customFont1.setTextColor("#F8CDD5".toColorInt())
+    private fun setupClickListener() {
+        binding.editTextZitiSubmit.setOnClickListener {
+            viewModel.updateZitiEditTextValue(binding.editTextZiti.text.toString())
+        }
+    }
 
-            fontListAdapter?.submitData(
-                ZitiliebiaoFragment.getFontList(ZitiliebiaoFragment.EMPTY_TEXT)
-            )
-            chineseListAdapter?.submitData(
-                DianzhuiListFragment.getFontList(DianzhuiListFragment.EMPTY_TEXT)
-            )
-            decorationListAdapter?.submitData(
-                ZhuangshiListFragment.getFontList(ZhuangshiListFragment.EMPTY_TEXT)
-            )
-        } else {
-            binding.customFont0.setTextColor("#F8CDD5".toColorInt())
-            binding.customFont1.setTextColor("#EE869B".toColorInt())
-
-            fontListAdapter?.submitData(
-                ZitiliebiaoFragment.getFontList(text)
-            )
-            chineseListAdapter?.submitData(
-                DianzhuiListFragment.getFontList(text)
-            )
-            decorationListAdapter?.submitData(
-                ZhuangshiListFragment.getFontList(text)
-            )
+    private fun observeEvents() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.zitiEditTextValue.collect { value ->
+                    if (value.isEmpty()) {
+                        binding.customFont0.setTextColor("#EE869B".toColorInt())
+                        binding.customFont1.setTextColor("#F8CDD5".toColorInt())
+                    } else {
+                        binding.customFont0.setTextColor("#F8CDD5".toColorInt())
+                        binding.customFont1.setTextColor("#EE869B".toColorInt())
+                    }
+                }
+            }
         }
     }
 

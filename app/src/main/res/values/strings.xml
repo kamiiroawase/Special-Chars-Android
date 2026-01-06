@@ -1,6 +1,8 @@
 <resources>
     <string name="app_name">Special Chars</string>
 
+    <string name="zaianyicituichuyingyong">Press back again to exit</string>
+
     <string name="ziti">Font</string>
     <string name="duanyu">Phrase</string>
     <string name="wode">Me</string>
@@ -14,7 +16,7 @@
     <string name="yonghuxieyi">User Agreement</string>
     <string name="yinsixieyi">Privacy Policy</string>
     <string name="yijianfankui">Feedback</string>
-    <string name="dangqianbanben">Version</string>
+    <string name="dangqianbanben">Version V%1$s</string>
 
     <string name="lianxifangshi">E-mail</string>
     <string name="lianxifangshi2">Enter a valid E-mail</string>

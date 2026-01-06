@@ -111,7 +111,7 @@ class DuanyuliebiaoFragment : Fragment() {
 
         setUpViews()
 
-        MainActivity.fragmentInitCount++
+        MainActivity.initializedFragmentCount++
     }
 
     private fun setUpViews() {

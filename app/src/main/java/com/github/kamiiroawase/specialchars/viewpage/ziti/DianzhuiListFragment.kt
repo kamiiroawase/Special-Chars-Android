@@ -5,13 +5,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.github.kamiiroawase.specialchars.App
+import com.github.kamiiroawase.specialchars.R
 import com.github.kamiiroawase.specialchars.databinding.FragmentZitiliebiaoBinding
 import com.github.kamiiroawase.specialchars.fragment.ZitiFragment
+import com.github.kamiiroawase.specialchars.viewmodel.ZitiFragmentViewModel
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.launch
 
 class DianzhuiListFragment : Fragment() {
     private var _binding: FragmentZitiliebiaoBinding? = null
     private val binding get() = _binding!!
+
+    private val viewModel: ZitiFragmentViewModel by viewModels({ requireParentFragment() })
 
     private val adapter = ZitiFragment.FontListAdapter(getFontList(EMPTY_TEXT))
 
@@ -19,17 +31,24 @@ class DianzhuiListFragment : Fragment() {
         const val EMPTY_TEXT: String = "一期一会"
 
         fun getFontList(text: String): List<ZitiFragment.Font.Item1> {
-            return listOf(
-                ZitiFragment.Font.Item1(customBuildString(text, "", "̚")),
-                ZitiFragment.Font.Item1(customBuildString(text, "", "҈")),
-                ZitiFragment.Font.Item1(customBuildString(text, "", "҉")),
-                ZitiFragment.Font.Item1(customBuildString(text, "៚", "ོོ ͜✿ ҉҉҉҉҉")),
-                ZitiFragment.Font.Item1(customBuildString(text, "ζั͡ ", "ζั͡✾")),
-                ZitiFragment.Font.Item1(customBuildString(text, "ζั͡ ", "ζั͡✿")),
-                ZitiFragment.Font.Item1(customBuildString(text, "ζั͡ ", "ζั͡❀")),
-                ZitiFragment.Font.Item1(customBuildString(text, "", "ஊ")),
-                ZitiFragment.Font.Item1(customBuildString(text, "", "෴"))
-            )
+            val data = try {
+                Gson().fromJson(
+                    App.getStringFromRaw(R.raw.ziti_dianzhui_data),
+                    object : TypeToken<List<Map<String, String>>>() {}.type
+                )
+            } catch (_: Exception) {
+                listOf<Map<String, String>>()
+            }
+
+            return data.map {
+                ZitiFragment.Font.Item1(
+                    customBuildString(
+                        text,
+                        it["a"] as String,
+                        it["b"] as String
+                    )
+                )
+            }
         }
 
         private fun customBuildString(text: String, append1: String, append2: String): String {
@@ -62,15 +81,29 @@ class DianzhuiListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setUpViews()
+        initView()
+
+        observeEvents()
     }
 
-    private fun setUpViews() {
+    private fun initView() {
         binding.fontList.layoutManager =
             LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
         binding.fontList.isNestedScrollingEnabled = false
         binding.fontList.adapter = adapter
+    }
 
-        ZitiFragment.getInstance()?.chineseListAdapter = adapter
+    private fun observeEvents() {
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModel.zitiEditTextValue.collect { value ->
+                    if (value.isEmpty()) {
+                        adapter.submitData(getFontList(EMPTY_TEXT))
+                    } else {
+                        adapter.submitData(getFontList(value))
+                    }
+                }
+            }
+        }
     }
 }

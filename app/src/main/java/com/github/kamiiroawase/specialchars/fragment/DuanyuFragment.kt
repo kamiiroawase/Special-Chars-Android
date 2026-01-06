@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.github.kamiiroawase.specialchars.App
 import com.google.android.material.tabs.TabLayoutMediator
 import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuBinding
 import com.github.kamiiroawase.specialchars.R
@@ -34,10 +35,10 @@ class DuanyuFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setUpViewpage2AndTabLayout()
+        initView()
     }
 
-    private fun setUpViewpage2AndTabLayout() {
+    private fun initView() {
         val tabs = listOf(
             getString(R.string.duanyu),
             getString(R.string.tuan),
@@ -58,41 +59,33 @@ class DuanyuFragment : BaseFragment() {
     }
 
     class DecoratePagerAdapter(
-        private val fragment: Fragment,
+        fragment: Fragment,
         private val tabs: List<String>
     ) : FragmentStateAdapter(fragment) {
         override fun getItemCount() = tabs.size
         override fun createFragment(position: Int): Fragment = when (position) {
             0 -> DuanyuliebiaoFragment.newInstance(
-                getStringFromRaw(R.raw.duanyu_duanyu_data)
+                App.getStringFromRaw(R.raw.duanyu_duanyu_data)
             )
 
             1 -> DuanyuliebiaoFragment.newInstance(
-                getStringFromRaw(R.raw.duanyu_tuan_data),
+                App.getStringFromRaw(R.raw.duanyu_tuan_data),
                 true,
                 listEnable = false
             )
 
             2 -> DuanyuliebiaoFragment.newInstance(
-                getStringFromRaw(R.raw.duanyu_fenge_data),
+                App.getStringFromRaw(R.raw.duanyu_fenge_data),
                 true
             )
 
             3 -> DuanyuliebiaoFragment.newInstance(
-                getStringFromRaw(R.raw.duanyu_fuhao_data)
+                App.getStringFromRaw(R.raw.duanyu_fuhao_data)
             )
 
             else -> DuanyuliebiaoFragment.newInstance(
-                getStringFromRaw(R.raw.duanyu_yanzi_data)
+                App.getStringFromRaw(R.raw.duanyu_yanzi_data)
             )
-        }
-
-        fun getStringFromRaw(id: Int): String {
-            return fragment
-                .resources
-                .openRawResource(id)
-                .bufferedReader()
-                .use { it.readText() }
         }
     }
 }

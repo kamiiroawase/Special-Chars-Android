@@ -1,11 +1,11 @@
 package com.github.kamiiroawase.specialchars.fragment
 
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import com.github.kamiiroawase.specialchars.R
 import com.github.kamiiroawase.specialchars.activity.WebActivity
 import com.github.kamiiroawase.specialchars.activity.FeedbackActivity
 import com.github.kamiiroawase.specialchars.databinding.FragmentWodeBinding
@@ -33,39 +33,37 @@ class WodeFragment : BaseFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setUpClickListener()
+        initView()
 
-        setUpDangqianbanbenUI()
+        setupClickListener()
     }
 
-    private fun setUpClickListener() {
+    private fun setupClickListener() {
         binding.buttonYonghuxieyi.setOnClickListener {
-            startActivity(Intent(activity, WebActivity::class.java).apply {
-                putExtra("url", "https://www.irs.gov/")
-            })
+            startActivity(Intent(requireContext(), WebActivity::class.java))
         }
 
         binding.buttonYinsixieyi.setOnClickListener {
-            startActivity(Intent(activity, WebActivity::class.java).apply {
-                putExtra("url", "https://www.irs.gov/")
-            })
+            startActivity(Intent(requireContext(), WebActivity::class.java))
         }
 
         binding.buttonYijianfankui.setOnClickListener {
-            startActivity(Intent(activity, FeedbackActivity::class.java))
+            startActivity(Intent(requireContext(), FeedbackActivity::class.java))
         }
     }
 
-    @SuppressLint("SetTextI18n")
-    private fun setUpDangqianbanbenUI() {
+    private fun initView() {
         binding.buttonDangqianbanbenText.text =
-            binding.buttonDangqianbanbenText.text.toString() +
-                    " V" + (
-                    requireActivity()
-                        .packageManager
-                        .getPackageInfo(requireActivity().packageName, 0)
-                        .versionName
-                        ?: ""
-                    )
+            getString(R.string.dangqianbanben, getVersionName())
+    }
+
+    private fun getVersionName(): String {
+        return runCatching {
+            requireContext()
+                .packageManager
+                .getPackageInfo(requireContext().packageName, 0)
+                .versionName
+                ?: ""
+        }.getOrDefault("")
     }
 }

@@ -1,7 +1,6 @@
 package com.github.kamiiroawase.specialchars.activity
 
 import android.os.Bundle
-import android.widget.Toast
 import androidx.core.widget.doAfterTextChanged
 import com.github.kamiiroawase.specialchars.R
 import com.github.kamiiroawase.specialchars.databinding.ActivityFeedbackBinding
@@ -32,26 +31,26 @@ class FeedbackActivity : BaseActivity() {
 
     private fun setupClickListener() {
         binding.submitButton.setOnClickListener {
-            if (binding.contactEditText.text.toString().trim().isEmpty()) {
+            val contactEditText = binding.contactEditText
+            val feedbackEditText = binding.feedbackEditText
+            val feedbackCountText = binding.feedbackCountText
+
+            if (contactEditText.text.toString().isBlank()) {
                 showToast(R.string.fankuiyijian3)
                 return@setOnClickListener
             }
 
-            if (binding.feedbackEditText.text.toString().trim().isEmpty()) {
+            if (feedbackEditText.text.toString().isBlank()) {
                 showToast(R.string.fankuiyijian3)
                 return@setOnClickListener
             }
 
-            binding.feedbackCountText.text = "0"
-            binding.feedbackEditText.setText("")
+            feedbackCountText.text = 0.toString()
+            feedbackEditText.setText("")
 
             showToast(R.string.tijiaochenggong)
 
             finish()
         }
-    }
-
-    private fun showToast(resId: Int) {
-        Toast.makeText(this, resId, Toast.LENGTH_SHORT).show()
     }
 }
