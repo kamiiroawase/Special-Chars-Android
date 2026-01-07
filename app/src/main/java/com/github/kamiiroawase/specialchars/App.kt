@@ -4,7 +4,7 @@ import android.app.Application
 
 class App : Application() {
     companion object {
-        lateinit var INSTANCE: App
+        private lateinit var INSTANCE: App
 
         fun getStringFromRaw(id: Int): String {
             return INSTANCE

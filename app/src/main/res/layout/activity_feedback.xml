@@ -20,8 +20,8 @@
             android:orientation="vertical"
             android:paddingHorizontal="32dp"
             android:paddingBottom="42dp"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="488dp">
 
@@ -42,11 +42,11 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="20dp"
-                    android:paddingVertical="14dp"
                     android:autofillHints="@null"
                     android:background="@null"
                     android:hint="@string/lianxifangshi2"
                     android:inputType="text"
+                    android:paddingVertical="14dp"
                     android:singleLine="true"
                     android:textColor="#666666"
                     android:textSize="14sp"
@@ -116,8 +116,8 @@
             android:layout_marginTop="42dp"
             android:backgroundTint="#2879FE"
             app:cardCornerRadius="1000dp"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/formContainer"
             app:layout_constraintWidth_max="488dp">
 
