@@ -17,6 +17,7 @@ import com.github.kamiiroawase.specialchars.fragment.ZitiFragment
 import com.github.kamiiroawase.specialchars.viewmodel.ZitiFragmentViewModel
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
@@ -26,35 +27,19 @@ class ZhuangshiListFragment : Fragment() {
 
     private val viewModel: ZitiFragmentViewModel by viewModels({ requireParentFragment() })
 
-    private val adapter = ZitiFragment.FontListAdapter(getFontList(EMPTY_TEXT))
+    private lateinit var fontListAdapter: ZitiFragment.FontListAdapter<ZitiFragment.Font.Item1>
+
+    private val fontMetaList: List<FontMeta> by lazy {
+        runCatching {
+            Gson().fromJson<List<FontMeta>>(
+                App.getStringFromRaw(R.raw.ziti_zhuangshi_data),
+                object : TypeToken<List<FontMeta>>() {}.type
+            )
+        }.getOrElse { emptyList() }
+    }
 
     companion object {
-        const val EMPTY_TEXT: String = "Sakura"
-
-        fun getFontList(text: String): List<ZitiFragment.Font.Item1> {
-            val data = try {
-                Gson().fromJson(
-                    App.getStringFromRaw(R.raw.ziti_zhuangshi_data),
-                    object : TypeToken<List<Map<String, String>>>() {}.type
-                )
-            } catch (_: Exception) {
-                listOf<Map<String, String>>()
-            }
-
-            return data.map {
-                ZitiFragment.Font.Item1(
-                    customBuildString(
-                        text,
-                        it["a"] as String,
-                        it["b"] as String
-                    )
-                )
-            }
-        }
-
-        private fun customBuildString(text: String, append1: String, append2: String): String {
-            return append1 + text + append2
-        }
+        private const val DEFAULT_SAMPLE_TEXT: String = "Sakura"
     }
 
     override fun onCreateView(
@@ -64,11 +49,15 @@ class ZhuangshiListFragment : Fragment() {
     ): View {
         _binding = FragmentZitiliebiaoBinding.inflate(inflater, container, false)
 
+        fontListAdapter = ZitiFragment.FontListAdapter(buildFontItemList(DEFAULT_SAMPLE_TEXT))
+
         return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        binding.fontList.adapter = null
 
         _binding = null
     }
@@ -78,28 +67,54 @@ class ZhuangshiListFragment : Fragment() {
 
         initView()
 
-        observeEvents()
+        observeViewModel()
     }
 
     private fun initView() {
-        binding.fontList.layoutManager =
-            LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
-        binding.fontList.isNestedScrollingEnabled = false
-        binding.fontList.adapter = adapter
+        binding.fontList.apply {
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.VERTICAL,
+                false
+            )
+
+            isNestedScrollingEnabled = false
+            adapter = fontListAdapter
+        }
     }
 
-    private fun observeEvents() {
+    private fun observeViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.zitiEditTextValue.collect { value ->
-                    if (value.isEmpty()) {
-                        adapter.submitData(getFontList(EMPTY_TEXT))
+                viewModel.zitiEditTextValue.collectLatest { inputText ->
+                    if (inputText.isEmpty()) {
+                        fontListAdapter.submitData(buildFontItemList(DEFAULT_SAMPLE_TEXT))
                     } else {
-                        val a = getFontList(value)
-                        adapter.submitData(a)
+                        fontListAdapter.submitData(buildFontItemList(inputText))
                     }
                 }
             }
         }
     }
+
+    fun buildFontItemList(text: String): List<ZitiFragment.Font.Item1> {
+        return fontMetaList.map {
+            ZitiFragment.Font.Item1(
+                buildFontItemText(
+                    text,
+                    it.a,
+                    it.b
+                )
+            )
+        }
+    }
+
+    private fun buildFontItemText(text: String, append1: String, append2: String): String {
+        return append1 + text + append2
+    }
+
+    data class FontMeta(
+        val a: String,
+        val b: String
+    )
 }

@@ -40,29 +40,31 @@ class DuanyuFragment : BaseFragment() {
 
     private fun initView() {
         val tabs = listOf(
-            getString(R.string.duanyu),
-            getString(R.string.tuan),
-            getString(R.string.fenge),
-            getString(R.string.fuhao),
-            getString(R.string.yanzi)
+            R.string.duanyu,
+            R.string.tuan,
+            R.string.fenge,
+            R.string.fuhao,
+            R.string.yanzi
         )
 
-        val pagerAdapter = DecoratePagerAdapter(this, tabs)
+        val pagerAdapter = DecoratePagerAdapter(this, tabs.size)
 
         binding.viewPager2.adapter = pagerAdapter
         binding.viewPager2.isUserInputEnabled = false
         binding.viewPager2.offscreenPageLimit = tabs.size - 1
 
         TabLayoutMediator(binding.tabLayout, binding.viewPager2) { tab, position ->
-            tab.text = tabs[position]
+            tab.text = getString(tabs[position])
         }.attach()
     }
 
     class DecoratePagerAdapter(
         fragment: Fragment,
-        private val tabs: List<String>
+        private val itemCount: Int
     ) : FragmentStateAdapter(fragment) {
-        override fun getItemCount() = tabs.size
+        override fun getItemCount() = itemCount
+
+        @Suppress("BooleanLiteralArgument")
         override fun createFragment(position: Int): Fragment = when (position) {
             0 -> DuanyuliebiaoFragment.newInstance(
                 App.getStringFromRaw(R.raw.duanyu_duanyu_data)
@@ -71,7 +73,7 @@ class DuanyuFragment : BaseFragment() {
             1 -> DuanyuliebiaoFragment.newInstance(
                 App.getStringFromRaw(R.raw.duanyu_tuan_data),
                 true,
-                listEnable = false
+                false
             )
 
             2 -> DuanyuliebiaoFragment.newInstance(

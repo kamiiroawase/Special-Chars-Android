@@ -29,9 +29,23 @@ class DuanyuneirongFragment : Fragment() {
     private var spanType: Int = 1
     private var spanCount: Int = 1
 
-    private var textList: List<String>? = null
+    private val textList: List<String> by lazy {
+        val json = requireArguments().getString(KEY_TEXT_LIST)
+            ?: return@lazy emptyList()
+
+        runCatching {
+            Gson().fromJson<List<String>>(
+                json,
+                object : TypeToken<List<String>>() {}.type
+            )
+        }.getOrElse { emptyList() }
+    }
 
     companion object {
+        private const val KEY_SPAN_TYPE = "KEY_SPAN_TYPE"
+        private const val KEY_SPAN_COUNT = "KEY_SPAN_COUNT"
+        private const val KEY_TEXT_LIST = "KEY_TEXT_LIST"
+
         fun newInstance(
             textList: List<String>,
             spanCount: Int,
@@ -39,9 +53,9 @@ class DuanyuneirongFragment : Fragment() {
         ): DuanyuneirongFragment {
             return DuanyuneirongFragment().apply {
                 arguments = Bundle().apply {
-                    putString("textList", Gson().toJson(textList))
-                    putInt("spanCount", spanCount)
-                    putInt("spanType", spanType)
+                    putString(KEY_TEXT_LIST, Gson().toJson(textList))
+                    putInt(KEY_SPAN_COUNT, spanCount)
+                    putInt(KEY_SPAN_TYPE, spanType)
                 }
             }
         }
@@ -51,16 +65,8 @@ class DuanyuneirongFragment : Fragment() {
         super.onCreate(savedInstanceState)
 
         requireArguments().let { bundle ->
-            spanType = bundle.getInt("spanType", spanType)
-            spanCount = bundle.getInt("spanCount", spanCount)
-
-            bundle.getString("textList").let { json ->
-                textList = try {
-                    Gson().fromJson(json, object : TypeToken<List<String>>() {}.type)
-                } catch (_: Exception) {
-                    null
-                }
-            }
+            spanType = bundle.getInt(KEY_SPAN_TYPE, spanType)
+            spanCount = bundle.getInt(KEY_SPAN_COUNT, spanCount)
         }
     }
 
@@ -74,23 +80,29 @@ class DuanyuneirongFragment : Fragment() {
         return binding.root
     }
 
+    override fun onDestroyView() {
+        super.onDestroyView()
+
+        _binding = null
+    }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setUpViews()
+        initView()
     }
 
-    private fun setUpViews() {
-        if ((spanType == 2 || spanType == 3) && spanCount > 1) {
-            binding.contentRecyclerView.layoutManager =
+    private fun initView() {
+        binding.contentRecyclerView.apply {
+            layoutManager = if ((spanType == 2 || spanType == 3) && spanCount > 1) {
                 StaggeredGridLayoutManager(spanCount, StaggeredGridLayoutManager.VERTICAL)
-        } else {
-            binding.contentRecyclerView.layoutManager =
+            } else {
                 GridLayoutManager(requireActivity(), spanCount)
-        }
+            }
 
-        binding.contentRecyclerView.isNestedScrollingEnabled = false
-        binding.contentRecyclerView.adapter = ContentRecyclerViewAdapter(textList!!, spanType)
+            isNestedScrollingEnabled = false
+            adapter = ContentRecyclerViewAdapter(textList, spanType)
+        }
     }
 
     class ContentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
@@ -99,16 +111,13 @@ class DuanyuneirongFragment : Fragment() {
     }
 
     class ContentRecyclerViewAdapter(
-        private var dataList: List<String>,
+        private var textList: List<String>,
         private val spanType: Int
     ) :
         RecyclerView.Adapter<ContentViewHolder>() {
-        private var _context: Context? = null
-        private val context get() = _context!!
+        override fun getItemCount(): Int = textList.size
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ContentViewHolder {
-            _context = parent.context
-
             val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_duanyuliebiao_text, parent, false)
 
@@ -116,7 +125,7 @@ class DuanyuneirongFragment : Fragment() {
         }
 
         override fun onBindViewHolder(holder: ContentViewHolder, position: Int) {
-            val text = dataList[position]
+            val text = textList[position]
 
             holder.contentText.text = text
 
@@ -126,48 +135,53 @@ class DuanyuneirongFragment : Fragment() {
                 }
 
                 2, 3 -> {
-                    holder.contentText.gravity = Gravity.START
-                    holder.contentText.maxLines = text.count { it == '\n' } +
-                            if (spanType == 3) 0 else 1
-                    holder.contentText.setAutoSizeTextTypeUniformWithConfiguration(
-                        1,
-                        16,
-                        1,
-                        TypedValue.COMPLEX_UNIT_SP
-                    )
+                    holder.contentText.apply {
+                        gravity = Gravity.START
+                        maxLines = text.count { it == '\n' } +
+                                if (spanType == 3) 0 else 1
+                        setAutoSizeTextTypeUniformWithConfiguration(
+                            1,
+                            16,
+                            1,
+                            TypedValue.COMPLEX_UNIT_SP
+                        )
+                    }
                 }
 
                 else -> {
-                    holder.contentText.maxLines = 1
-                    holder.contentText.gravity = Gravity.CENTER
-                    holder.contentText.setAutoSizeTextTypeUniformWithConfiguration(
-                        1,
-                        16,
-                        1,
-                        TypedValue.COMPLEX_UNIT_SP
-                    )
+                    holder.contentText.apply {
+                        maxLines = 1
+                        gravity = Gravity.CENTER
+                        setAutoSizeTextTypeUniformWithConfiguration(
+                            1,
+                            16,
+                            1,
+                            TypedValue.COMPLEX_UNIT_SP
+                        )
+                    }
                 }
             }
 
             holder.contentTextWrap.setOnClickListener {
-                val clipboard =
-                    context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                getClipboard(it).setPrimaryClip(ClipData.newPlainText("fontItem", text))
 
-                clipboard.setPrimaryClip(ClipData.newPlainText("fontItem", text))
+                showToast(it, R.string.fuzhichenggong)
 
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.fuzhichenggong),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                holder.contentText.setTextColor("#EE869B".toColorInt())
-                holder.contentText.postDelayed({
-                    holder.contentText.setTextColor("#000000".toColorInt())
-                }, 500L)
+                holder.contentText.apply {
+                    setTextColor("#EE869B".toColorInt())
+                    postDelayed({
+                        setTextColor("#000000".toColorInt())
+                    }, 500L)
+                }
             }
         }
 
-        override fun getItemCount(): Int = dataList.size
+        private fun getClipboard(view: View): ClipboardManager {
+            return view.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        }
+
+        private fun showToast(view: View, resId: Int) {
+            Toast.makeText(view.context, resId, Toast.LENGTH_SHORT).show()
+        }
     }
 }

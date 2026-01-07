@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.kamiiroawase.specialchars.databinding.FragmentZitiliebiaoBinding
 import com.github.kamiiroawase.specialchars.fragment.ZitiFragment
 import com.github.kamiiroawase.specialchars.viewmodel.ZitiFragmentViewModel
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.getValue
 
@@ -23,26 +24,12 @@ class ZitiliebiaoFragment : Fragment() {
 
     private val viewModel: ZitiFragmentViewModel by viewModels({ requireParentFragment() })
 
-    private val adapter = ZitiFragment.FontListAdapter(getFontList(EMPTY_TEXT))
+    private lateinit var fontListAdapter: ZitiFragment.FontListAdapter<ZitiFragment.Font.Item2>
+
+    private lateinit var fontMetaList: List<FontMeta>
 
     companion object {
-        const val EMPTY_TEXT: String = "Best wishes to you"
-
-        fun getFontList(text: String): List<ZitiFragment.Font.Item2> {
-            val data = listOf(
-                mapOf("a" to Typeface.SANS_SERIF, "b" to "sans-serif"),
-                mapOf("a" to Typeface.MONOSPACE, "b" to "monospace"),
-                mapOf("a" to Typeface.SERIF, "b" to "sans-serif")
-            )
-
-            return data.map {
-                ZitiFragment.Font.Item2(
-                    text,
-                    it["a"] as Typeface,
-                    it["b"] as String
-                )
-            }
-        }
+        private const val DEFAULT_SAMPLE_TEXT: String = "Best wishes to you"
     }
 
     override fun onCreateView(
@@ -52,11 +39,15 @@ class ZitiliebiaoFragment : Fragment() {
     ): View {
         _binding = FragmentZitiliebiaoBinding.inflate(inflater, container, false)
 
+        fontListAdapter = ZitiFragment.FontListAdapter(buildFontItemList(DEFAULT_SAMPLE_TEXT))
+
         return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
+
+        binding.fontList.adapter = null
 
         _binding = null
     }
@@ -64,29 +55,60 @@ class ZitiliebiaoFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        initData()
+
         initView()
 
-        observeEvents()
+        observeViewModel()
     }
 
     private fun initView() {
-        binding.fontList.layoutManager =
-            LinearLayoutManager(requireActivity(), LinearLayoutManager.VERTICAL, false)
-        binding.fontList.isNestedScrollingEnabled = false
-        binding.fontList.adapter = adapter
+        binding.fontList.apply {
+            layoutManager = LinearLayoutManager(
+                requireContext(),
+                LinearLayoutManager.VERTICAL,
+                false
+            )
+
+            isNestedScrollingEnabled = false
+            adapter = fontListAdapter
+        }
     }
 
-    private fun observeEvents() {
+    private fun observeViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.zitiEditTextValue.collect { value ->
-                    if (value.isEmpty()) {
-                        adapter.submitData(getFontList(EMPTY_TEXT))
+                viewModel.zitiEditTextValue.collectLatest { inputText ->
+                    if (inputText.isEmpty()) {
+                        fontListAdapter.submitData(buildFontItemList(DEFAULT_SAMPLE_TEXT))
                     } else {
-                        adapter.submitData(getFontList(value))
+                        fontListAdapter.submitData(buildFontItemList(inputText))
                     }
                 }
             }
         }
     }
+
+    private fun initData() {
+        fontMetaList = listOf(
+            FontMeta(Typeface.SANS_SERIF, "sans-serif"),
+            FontMeta(Typeface.MONOSPACE, "monospace"),
+            FontMeta(Typeface.SERIF, "sans-serif")
+        )
+    }
+
+    fun buildFontItemList(text: String): List<ZitiFragment.Font.Item2> {
+        return fontMetaList.map {
+            ZitiFragment.Font.Item2(
+                text,
+                it.a,
+                it.b
+            )
+        }
+    }
+
+    data class FontMeta(
+        val a: Typeface,
+        val b: String
+    )
 }

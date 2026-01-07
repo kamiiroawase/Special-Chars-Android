@@ -1,6 +1,5 @@
 package com.github.kamiiroawase.specialchars.fragment
 
-import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -58,7 +57,7 @@ class ZitiFragment : BaseFragment() {
 
         setupClickListener()
 
-        observeEvents()
+        observeViewModel()
     }
 
     private fun initView() {
@@ -67,7 +66,7 @@ class ZitiFragment : BaseFragment() {
             getString(R.string.dianzhui)
         )
 
-        val pagerAdapter = DecoratePagerAdapter(this, tabs)
+        val pagerAdapter = ZitiPagerAdapter(this, tabs)
 
         binding.viewPager2.adapter = pagerAdapter
         binding.viewPager2.isUserInputEnabled = false
@@ -84,7 +83,7 @@ class ZitiFragment : BaseFragment() {
         }
     }
 
-    private fun observeEvents() {
+    private fun observeViewModel() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.zitiEditTextValue.collect { value ->
@@ -112,17 +111,6 @@ class ZitiFragment : BaseFragment() {
         ) : Font()
     }
 
-    class DecoratePagerAdapter(
-        fragment: ZitiFragment,
-        private val tabs: List<String>
-    ) : FragmentStateAdapter(fragment) {
-        override fun getItemCount() = tabs.size
-        override fun createFragment(position: Int): Fragment = when (position) {
-            0 -> ZhuangshiListFragment()
-            else -> DianzhuiListFragment()
-        }
-    }
-
     class FontItem1ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val fontListText: TextView = itemView.findViewById(R.id.fontListText)
         val fontListTextWrap: LinearLayout = itemView.findViewById(R.id.fontListTextWrap)
@@ -133,26 +121,35 @@ class ZitiFragment : BaseFragment() {
         val fontListTextWrap: LinearLayout = itemView.findViewById(R.id.fontListTextWrap)
     }
 
+    class ZitiPagerAdapter(
+        fragment: ZitiFragment,
+        private val tabs: List<String>
+    ) : FragmentStateAdapter(fragment) {
+        override fun getItemCount() = tabs.size
+        override fun createFragment(position: Int): Fragment = when (position) {
+            0 -> ZhuangshiListFragment()
+            else -> DianzhuiListFragment()
+        }
+    }
+
     class FontListAdapter<T : Font>(private var dataList: List<T>) :
         RecyclerView.Adapter<RecyclerView.ViewHolder>() {
-        private var _context: Context? = null
-        private val context get() = _context!!
-
         companion object {
             private const val VIEW_TYPE_FONT_ITEM_1 = 1
             private const val VIEW_TYPE_FONT_ITEM_2 = 2
         }
 
-        @SuppressLint("NotifyDataSetChanged")
-        fun submitData(newData: List<T>) {
-            dataList = newData
-            notifyDataSetChanged()
+        override fun getItemCount(): Int = dataList.size
+
+        override fun getItemViewType(position: Int): Int {
+            return when (dataList[position]) {
+                is Font.Item1 -> VIEW_TYPE_FONT_ITEM_1
+                is Font.Item2 -> VIEW_TYPE_FONT_ITEM_2
+            }
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-            _context = parent.context
-
-            val view = LayoutInflater.from(context)
+            val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.item_zitiliebiao_text, parent, false)
 
             return when (viewType) {
@@ -163,19 +160,6 @@ class ZitiFragment : BaseFragment() {
         }
 
         override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-            val clipDoneFn = fun(fontListText: TextView) {
-                Toast.makeText(
-                    context,
-                    context.getString(R.string.fuzhichenggong),
-                    Toast.LENGTH_SHORT
-                ).show()
-
-                fontListText.setTextColor("#EE869B".toColorInt())
-                fontListText.postDelayed({
-                    fontListText.setTextColor("#000000".toColorInt())
-                }, 500L)
-            }
-
             when (holder) {
                 is FontItem1ViewHolder -> {
                     val item = dataList[position] as Font.Item1
@@ -183,12 +167,14 @@ class ZitiFragment : BaseFragment() {
                     holder.fontListText.text = item.text
 
                     holder.fontListTextWrap.setOnClickListener {
-                        val clipboard =
-                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        getClipboard(it).setPrimaryClip(
+                            ClipData.newPlainText(
+                                "fontItem",
+                                item.text
+                            )
+                        )
 
-                        clipboard.setPrimaryClip(ClipData.newPlainText("fontItem", item.text))
-
-                        clipDoneFn(holder.fontListText)
+                        clipCopyDone(holder.fontListText)
                     }
                 }
 
@@ -199,10 +185,7 @@ class ZitiFragment : BaseFragment() {
                     holder.fontListText.typeface = item.typeface
 
                     holder.fontListTextWrap.setOnClickListener {
-                        val clipboard =
-                            context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-
-                        clipboard.setPrimaryClip(
+                        getClipboard(it).setPrimaryClip(
                             ClipData.newHtmlText(
                                 "fontItem", item.text, """
                             <span style="font-family:'${item.fontName}';">
@@ -212,19 +195,34 @@ class ZitiFragment : BaseFragment() {
                             )
                         )
 
-                        clipDoneFn(holder.fontListText)
+                        clipCopyDone(holder.fontListText)
                     }
                 }
             }
         }
 
-        override fun getItemViewType(position: Int): Int {
-            return when (dataList[position]) {
-                is Font.Item1 -> VIEW_TYPE_FONT_ITEM_1
-                is Font.Item2 -> VIEW_TYPE_FONT_ITEM_2
+        fun submitData(newData: List<T>) {
+            dataList = newData
+            notifyItemRangeChanged(0, dataList.size)
+        }
+
+        private fun clipCopyDone(view: TextView) {
+            showToast(view, R.string.fuzhichenggong)
+
+            view.apply {
+                setTextColor("#EE869B".toColorInt())
+                postDelayed({
+                    setTextColor("#000000".toColorInt())
+                }, 500L)
             }
         }
 
-        override fun getItemCount(): Int = dataList.size
+        private fun getClipboard(view: View): ClipboardManager {
+            return view.context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        }
+
+        private fun showToast(view: View, resId: Int) {
+            Toast.makeText(view.context, resId, Toast.LENGTH_SHORT).show()
+        }
     }
 }

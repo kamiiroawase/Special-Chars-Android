@@ -8,7 +8,6 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.viewbinding.ViewBinding
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.github.kamiiroawase.specialchars.R
@@ -18,41 +17,53 @@ import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuliebiaoVer
 import com.github.kamiiroawase.specialchars.viewpage.duanyu.fragment.DuanyuneirongFragment
 
 class DuanyuliebiaoFragment : Fragment() {
-    private var _binding: ViewBinding? = null
-    private val binding get() = _binding!!
+    private var _binding: FragmentDuanyuliebiaoBinding? = null
+    private var _bindingVertical: FragmentDuanyuliebiaoVerticalBinding? = null
 
-    private var data: List<Map<String, Any>>? = null
+    private var isVertical: Boolean = false
+    private var isListVisible: Boolean = true
 
-    private var listEnable: Boolean = true
-    private var verticalEnable: Boolean = false
+    private var currentSelectedIndex = 0
+    private val listItemViewMap = mutableMapOf<Int, FrameLayout>()
 
-    private val listTextWraps = mutableMapOf<Int, FrameLayout>()
+    private val sectionList: List<DuanyuSection> by lazy {
+        val json = requireArguments().getString(KEY_SECTION_DATA_LIST)
+            ?: return@lazy emptyList()
 
-    private var listTextWrapPosition = 0
-    private var listTextWrapPositionKey = "LIST_TEXT_WRAP_POSITION"
+        runCatching {
+            Gson().fromJson<List<DuanyuSection>>(
+                json,
+                object : TypeToken<List<DuanyuSection>>() {}.type
+            )
+        }.getOrElse { emptyList() }
+    }
 
-    private val fragments by lazy {
-        data!!.map {
-            @Suppress("UNCHECKED_CAST")
+    private val contentFragments by lazy {
+        sectionList.map {
             DuanyuneirongFragment.newInstance(
-                it["textList"] as List<String>,
-                (it["spanCount"] as Number).toInt(),
-                (it["spanType"] as Number).toInt()
+                it.textList,
+                it.spanCount,
+                it.spanType
             )
         }
     }
 
     companion object {
+        private const val KEY_IS_VERTICAL = "KEY_IS_VERTICAL"
+        private const val KEY_IS_LIST_VISIBLE = "KEY_IS_LIST_VISIBLE"
+        private const val KEY_SECTION_DATA_LIST = "KEY_SECTION_DATA_LIST"
+        private const val KEY_CURRENT_SELECTED_INDEX = "KEY_CURRENT_SELECTED_INDEX"
+
         fun newInstance(
-            data: String,
-            verticalEnable: Boolean = false,
-            listEnable: Boolean = true
+            sectionList: String,
+            isVertical: Boolean = false,
+            isListVisible: Boolean = true
         ): DuanyuliebiaoFragment {
             return DuanyuliebiaoFragment().apply {
                 arguments = Bundle().apply {
-                    putBoolean("listEnable", listEnable)
-                    putBoolean("verticalEnable", verticalEnable)
-                    putString("data", data)
+                    putBoolean(KEY_IS_VERTICAL, isVertical)
+                    putBoolean(KEY_IS_LIST_VISIBLE, isListVisible)
+                    putString(KEY_SECTION_DATA_LIST, sectionList)
                 }
             }
         }
@@ -61,28 +72,20 @@ class DuanyuliebiaoFragment : Fragment() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
-        outState.putInt(listTextWrapPositionKey, listTextWrapPosition)
+        outState.putInt(KEY_CURRENT_SELECTED_INDEX, currentSelectedIndex)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         savedInstanceState?.let {
-            listTextWrapPosition =
-                savedInstanceState.getInt(listTextWrapPositionKey, listTextWrapPosition)
+            currentSelectedIndex =
+                savedInstanceState.getInt(KEY_CURRENT_SELECTED_INDEX, currentSelectedIndex)
         }
 
         requireArguments().let { bundle ->
-            listEnable = bundle.getBoolean("listEnable", listEnable)
-            verticalEnable = bundle.getBoolean("verticalEnable", verticalEnable)
-
-            bundle.getString("data").let { json ->
-                data = try {
-                    Gson().fromJson(json, object : TypeToken<List<Map<String, Any>>>() {}.type)
-                } catch (_: Exception) {
-                    data
-                }
-            }
+            isListVisible = bundle.getBoolean(KEY_IS_LIST_VISIBLE, isListVisible)
+            isVertical = bundle.getBoolean(KEY_IS_VERTICAL, isVertical)
         }
     }
 
@@ -91,46 +94,43 @@ class DuanyuliebiaoFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = if (verticalEnable) {
-            FragmentDuanyuliebiaoVerticalBinding.inflate(inflater, container, false)
+        return if (isVertical) {
+            _bindingVertical =
+                FragmentDuanyuliebiaoVerticalBinding.inflate(inflater, container, false)
+            _bindingVertical!!.root
         } else {
-            FragmentDuanyuliebiaoBinding.inflate(inflater, container, false)
+            _binding =
+                FragmentDuanyuliebiaoBinding.inflate(inflater, container, false)
+            _binding!!.root
         }
-
-        return binding.root
     }
 
     override fun onDestroyView() {
         super.onDestroyView()
 
+        _bindingVertical = null
         _binding = null
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        setUpViews()
+        initView()
 
         MainActivity.initializedFragmentCount++
     }
 
-    private fun setUpViews() {
-        val listRecyclerView = if (verticalEnable) {
-            (binding as FragmentDuanyuliebiaoVerticalBinding).listRecyclerView
-        } else {
-            (binding as FragmentDuanyuliebiaoBinding).listRecyclerView
-        }
+    private fun initView() {
+        val listRecyclerView = _binding?.listRecyclerView
+            ?: _bindingVertical!!.listRecyclerView
 
-        val listRecyclerViewWrap = if (verticalEnable) {
-            (binding as FragmentDuanyuliebiaoVerticalBinding).listRecyclerViewWrap
-        } else {
-            (binding as FragmentDuanyuliebiaoBinding).listRecyclerViewWrap
-        }
+        val listRecyclerViewWrap = _binding?.listRecyclerViewWrap
+            ?: _bindingVertical!!.listRecyclerViewWrap
 
-        if (!listEnable) {
+        if (!isListVisible) {
             val layoutParams = listRecyclerViewWrap.layoutParams
 
-            if (verticalEnable) {
+            if (isVertical) {
                 layoutParams.height = 0
             } else {
                 layoutParams.width = 0
@@ -139,8 +139,8 @@ class DuanyuliebiaoFragment : Fragment() {
             listRecyclerViewWrap.layoutParams = layoutParams
         }
 
-        data!!.forEachIndexed { position, item ->
-            val view = if (verticalEnable) {
+        sectionList.forEachIndexed { position, item ->
+            val view = if (isVertical) {
                 LayoutInflater.from(context)
                     .inflate(R.layout.item_duanyuliebiao_list_vertical, listRecyclerView, false)
             } else {
@@ -151,47 +151,45 @@ class DuanyuliebiaoFragment : Fragment() {
             val listText: TextView = view.findViewById(R.id.listText)
             val listTextWrap: FrameLayout = view.findViewById(R.id.listTextWrap)
 
-            listTextWraps.put(position, listTextWrap)
+            listItemViewMap.put(position, listTextWrap)
 
-            listText.text = item["listName"] as String
+            listText.text = item.listName
 
-            if (position == listTextWrapPosition) {
-                listTextWraps[listTextWrapPosition]?.setBackgroundColor(Color.WHITE)
+            if (position == currentSelectedIndex) {
+                listItemViewMap[currentSelectedIndex]?.setBackgroundColor(Color.WHITE)
                 switchFragment(position)
             }
 
             listTextWrap.setOnClickListener {
-                val savedScroll = if (verticalEnable) {
+                val savedScroll = if (isVertical) {
                     listRecyclerViewWrap.scrollX
                 } else {
                     listRecyclerViewWrap.scrollY
                 }
 
-                listTextWraps[listTextWrapPosition]?.setBackgroundColor(Color.TRANSPARENT)
-                listTextWrapPosition = position
-                listTextWraps[listTextWrapPosition]?.setBackgroundColor(Color.WHITE)
+                listItemViewMap[currentSelectedIndex]?.setBackgroundColor(Color.TRANSPARENT)
+                currentSelectedIndex = position
+                listItemViewMap[currentSelectedIndex]?.setBackgroundColor(Color.WHITE)
 
                 switchFragment(position)
 
-                if (verticalEnable) {
-                    listRecyclerViewWrap.postDelayed({
+                listRecyclerViewWrap.postDelayed({
+                    if (isVertical) {
                         listRecyclerViewWrap.scrollX = savedScroll
-                    }, 100L)
-                } else {
-                    listRecyclerViewWrap.postDelayed({
+                    } else {
                         listRecyclerViewWrap.scrollY = savedScroll
-                    }, 100L)
-                }
+                    }
+                }, 100L)
             }
 
-            if (!listEnable) {
+            if (!isListVisible) {
                 listText.text = ""
                 listText.textSize = 0f
                 listTextWrap.setPadding(0, 0, 0, 0)
 
                 val layoutParams = listText.layoutParams
 
-                if (verticalEnable) {
+                if (isVertical) {
                     layoutParams.height = 0
                 } else {
                     layoutParams.width = 0
@@ -206,7 +204,14 @@ class DuanyuliebiaoFragment : Fragment() {
 
     fun switchFragment(position: Int) {
         val transaction = childFragmentManager.beginTransaction()
-        transaction.replace(R.id.fragmentContainer, fragments[position])
-        transaction.commitAllowingStateLoss()
+        transaction.replace(R.id.fragmentContainer, contentFragments[position])
+        transaction.commit()
     }
+
+    data class DuanyuSection(
+        val listName: String,
+        val textList: List<String>,
+        val spanCount: Int,
+        val spanType: Int
+    )
 }
