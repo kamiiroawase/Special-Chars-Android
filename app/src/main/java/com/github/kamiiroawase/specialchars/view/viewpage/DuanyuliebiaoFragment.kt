@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.viewpage.duanyu
+package com.github.kamiiroawase.specialchars.view.viewpage
 
 import android.graphics.Color
 import android.os.Bundle
@@ -8,13 +8,13 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.github.kamiiroawase.specialchars.R
-import com.github.kamiiroawase.specialchars.activity.MainActivity
 import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuliebiaoBinding
 import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuliebiaoVerticalBinding
-import com.github.kamiiroawase.specialchars.viewpage.duanyu.fragment.DuanyuneirongFragment
+import com.github.kamiiroawase.specialchars.view.activity.MainActivity
+import com.github.kamiiroawase.specialchars.view.fragment.DuanyuneirongFragment
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class DuanyuliebiaoFragment : Fragment() {
     private var _binding: FragmentDuanyuliebiaoBinding? = null
@@ -40,7 +40,7 @@ class DuanyuliebiaoFragment : Fragment() {
 
     private val contentFragments by lazy {
         sectionList.map {
-            DuanyuneirongFragment.newInstance(
+            DuanyuneirongFragment.Companion.newInstance(
                 it.textList,
                 it.spanCount,
                 it.spanType
@@ -117,7 +117,7 @@ class DuanyuliebiaoFragment : Fragment() {
 
         initView()
 
-        MainActivity.initializedFragmentCount++
+        MainActivity.Companion.initializedFragmentCount++
     }
 
     private fun initView() {

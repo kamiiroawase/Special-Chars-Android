@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.viewpage.ziti
+package com.github.kamiiroawase.specialchars.view.viewpage
 
 import android.graphics.Typeface
 import android.os.Bundle
@@ -12,8 +12,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.github.kamiiroawase.specialchars.databinding.FragmentZitiliebiaoBinding
-import com.github.kamiiroawase.specialchars.fragment.ZitiFragment
 import com.github.kamiiroawase.specialchars.viewmodel.ZitiFragmentViewModel
+import com.github.kamiiroawase.specialchars.view.adapter.ZitiliebiaoAdapter
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlin.getValue
@@ -24,7 +24,7 @@ class ZitiliebiaoFragment : Fragment() {
 
     private val viewModel: ZitiFragmentViewModel by viewModels({ requireParentFragment() })
 
-    private lateinit var fontListAdapter: ZitiFragment.FontListAdapter<ZitiFragment.Font.Item2>
+    private lateinit var fontListAdapter: ZitiliebiaoAdapter<ZitiliebiaoAdapter.Font.Item2>
 
     private lateinit var fontMetaList: List<FontMeta>
 
@@ -39,7 +39,7 @@ class ZitiliebiaoFragment : Fragment() {
     ): View {
         _binding = FragmentZitiliebiaoBinding.inflate(inflater, container, false)
 
-        fontListAdapter = ZitiFragment.FontListAdapter(buildFontItemList(DEFAULT_SAMPLE_TEXT))
+        fontListAdapter = ZitiliebiaoAdapter(buildFontItemList(DEFAULT_SAMPLE_TEXT))
 
         return binding.root
     }
@@ -97,9 +97,9 @@ class ZitiliebiaoFragment : Fragment() {
         )
     }
 
-    fun buildFontItemList(text: String): List<ZitiFragment.Font.Item2> {
+    fun buildFontItemList(text: String): List<ZitiliebiaoAdapter.Font.Item2> {
         return fontMetaList.map {
-            ZitiFragment.Font.Item2(
+            ZitiliebiaoAdapter.Font.Item2(
                 text,
                 it.a,
                 it.b

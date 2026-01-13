@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.activity
+package com.github.kamiiroawase.specialchars.view.activity
 
 import android.annotation.SuppressLint
 import android.os.Bundle
@@ -20,19 +20,15 @@ class WebActivity : BaseActivity() {
         binding = ActivityWebBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initView()
+        setupWebView()
+        setupRefreshListener()
+        loadUrl()
     }
 
     override fun onDestroy() {
         binding.webView.stopLoading()
 
         super.onDestroy()
-    }
-
-    private fun initView() {
-        setupWebView()
-        setupRefreshListener()
-        loadUrl()
     }
 
     private fun setupWebView() {

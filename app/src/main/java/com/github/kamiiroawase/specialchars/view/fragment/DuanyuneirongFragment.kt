@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.viewpage.duanyu.fragment
+package com.github.kamiiroawase.specialchars.view.fragment
 
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -17,10 +17,10 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
-import com.google.gson.Gson
-import com.google.gson.reflect.TypeToken
 import com.github.kamiiroawase.specialchars.R
 import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuneirongBinding
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 
 class DuanyuneirongFragment : Fragment() {
     private var _binding: FragmentDuanyuneirongBinding? = null

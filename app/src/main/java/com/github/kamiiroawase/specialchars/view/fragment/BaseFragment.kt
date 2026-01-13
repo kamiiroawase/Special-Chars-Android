@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.fragment
+package com.github.kamiiroawase.specialchars.view.fragment
 
 import androidx.fragment.app.Fragment
 

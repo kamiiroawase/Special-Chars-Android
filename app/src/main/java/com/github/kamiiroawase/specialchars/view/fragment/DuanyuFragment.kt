@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.fragment
+package com.github.kamiiroawase.specialchars.view.fragment
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,9 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.github.kamiiroawase.specialchars.App
 import com.google.android.material.tabs.TabLayoutMediator
-import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuBinding
 import com.github.kamiiroawase.specialchars.R
-import com.github.kamiiroawase.specialchars.viewpage.duanyu.DuanyuliebiaoFragment
+import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuBinding
+import com.github.kamiiroawase.specialchars.view.viewpage.DuanyuliebiaoFragment
 
 class DuanyuFragment : BaseFragment() {
     private var _binding: FragmentDuanyuBinding? = null

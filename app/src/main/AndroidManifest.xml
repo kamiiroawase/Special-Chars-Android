@@ -15,7 +15,7 @@
         android:theme="@style/Theme.SpecialChars">
 
         <activity
-            android:name=".activity.MainActivity"
+            android:name=".view.activity.MainActivity"
             android:windowSoftInputMode="adjustPan|stateHidden"
             android:launchMode="singleTask"
             android:exported="true">
@@ -26,10 +26,12 @@
         </activity>
 
         <activity
-            android:name=".activity.FeedbackActivity"
+            android:name=".view.activity.FeedbackActivity"
+            android:launchMode="singleTop"
             android:exported="false" />
         <activity
-            android:name=".activity.WebActivity"
+            android:name=".view.activity.WebActivity"
+            android:launchMode="singleTop"
             android:exported="false" />
     </application>
 </manifest>

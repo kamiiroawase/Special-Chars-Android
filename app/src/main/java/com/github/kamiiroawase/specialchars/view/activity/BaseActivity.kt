@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.activity
+package com.github.kamiiroawase.specialchars.view.activity
 
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity

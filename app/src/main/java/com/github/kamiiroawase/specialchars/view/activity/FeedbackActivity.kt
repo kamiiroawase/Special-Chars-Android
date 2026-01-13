@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.activity
+package com.github.kamiiroawase.specialchars.view.activity
 
 import android.os.Bundle
 import androidx.core.widget.doAfterTextChanged
@@ -14,11 +14,8 @@ class FeedbackActivity : BaseActivity() {
         binding = ActivityFeedbackBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        initView()
-    }
-
-    private fun initView() {
         setupEditTextChangedListener()
+
         setupClickListener()
     }
 

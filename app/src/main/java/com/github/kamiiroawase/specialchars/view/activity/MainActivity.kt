@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.activity
+package com.github.kamiiroawase.specialchars.view.activity
 
 import android.graphics.Color
 import android.os.Bundle
@@ -9,9 +9,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.github.kamiiroawase.specialchars.R
 import com.github.kamiiroawase.specialchars.databinding.ActivityMainBinding
-import com.github.kamiiroawase.specialchars.fragment.DuanyuFragment
-import com.github.kamiiroawase.specialchars.fragment.WodeFragment
-import com.github.kamiiroawase.specialchars.fragment.ZitiFragment
+import com.github.kamiiroawase.specialchars.view.fragment.DuanyuFragment
+import com.github.kamiiroawase.specialchars.view.fragment.WodeFragment
+import com.github.kamiiroawase.specialchars.view.fragment.ZitiFragment
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

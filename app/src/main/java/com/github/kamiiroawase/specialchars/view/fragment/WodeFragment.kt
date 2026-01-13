@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars.fragment
+package com.github.kamiiroawase.specialchars.view.fragment
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,9 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.github.kamiiroawase.specialchars.R
-import com.github.kamiiroawase.specialchars.activity.WebActivity
-import com.github.kamiiroawase.specialchars.activity.FeedbackActivity
 import com.github.kamiiroawase.specialchars.databinding.FragmentWodeBinding
+import com.github.kamiiroawase.specialchars.view.activity.WebActivity
+import com.github.kamiiroawase.specialchars.view.activity.FeedbackActivity
 
 class WodeFragment : BaseFragment() {
     private var _binding: FragmentWodeBinding? = null
