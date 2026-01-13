@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.viewpager2.adapter.FragmentStateAdapter
-import com.github.kamiiroawase.specialchars.App
 import com.google.android.material.tabs.TabLayoutMediator
 import com.github.kamiiroawase.specialchars.R
+import com.github.kamiiroawase.specialchars.base.App
 import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuBinding
 import com.github.kamiiroawase.specialchars.view.viewpage.DuanyuliebiaoFragment
 

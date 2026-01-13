@@ -1,4 +1,4 @@
-package com.github.kamiiroawase.specialchars
+package com.github.kamiiroawase.specialchars.base
 
 import android.app.Application
 

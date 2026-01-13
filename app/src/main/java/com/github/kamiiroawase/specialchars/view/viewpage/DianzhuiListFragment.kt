@@ -10,8 +10,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.github.kamiiroawase.specialchars.App
 import com.github.kamiiroawase.specialchars.R
+import com.github.kamiiroawase.specialchars.base.App
 import com.github.kamiiroawase.specialchars.databinding.FragmentZitiliebiaoBinding
 import com.github.kamiiroawase.specialchars.viewmodel.ZitiFragmentViewModel
 import com.github.kamiiroawase.specialchars.view.adapter.ZitiliebiaoAdapter
