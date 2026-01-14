@@ -40,7 +40,7 @@ class DuanyuliebiaoFragment : Fragment() {
 
     private val contentFragments by lazy {
         sectionList.map {
-            DuanyuneirongFragment.Companion.newInstance(
+            DuanyuneirongFragment.newInstance(
                 it.textList,
                 it.spanCount,
                 it.spanType

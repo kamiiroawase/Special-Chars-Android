@@ -64,12 +64,9 @@ class MainActivity : BaseActivity() {
             R.id.navigationWode to getNavFragment(R.id.navigationWode) { WodeFragment() }
         )
 
-        if (!isRestoring) {
-            binding.root.visibility = View.INVISIBLE
-        }
-
-
         lifecycleScope.launch {
+            binding.root.visibility = View.INVISIBLE
+
             while (initializedFragmentCount < 5) {
                 delay(100)
             }
@@ -88,9 +85,9 @@ class MainActivity : BaseActivity() {
 
             if (isRestoring) {
                 binding.bottomNav.selectedItemId = currentNavItemId
-            } else {
-                binding.root.visibility = View.VISIBLE
             }
+
+            binding.root.visibility = View.VISIBLE
         }
     }
 
@@ -107,6 +104,7 @@ class MainActivity : BaseActivity() {
             object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     val currentTime = System.currentTimeMillis()
+
                     if (currentTime - lastBackPressTimestamp >= EXIT_CONFIRM_INTERVAL) {
                         lastBackPressTimestamp = currentTime
                         showToast(R.string.zaianyicituichuyingyong)
@@ -154,12 +152,12 @@ class MainActivity : BaseActivity() {
     }
 
     private fun updateRootBackgroundColor() {
-        val color = if (currentNavItemId == R.id.navigationZiti) {
-            "#FFEDED".toColorInt()
-        } else {
-            Color.TRANSPARENT
-        }
-
-        binding.root.setBackgroundColor(color)
+        binding.root.setBackgroundColor(
+            if (currentNavItemId == R.id.navigationZiti) {
+                "#FFEDED".toColorInt()
+            } else {
+                Color.TRANSPARENT
+            }
+        )
     }
 }

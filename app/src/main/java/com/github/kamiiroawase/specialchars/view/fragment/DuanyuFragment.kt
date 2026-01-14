@@ -4,13 +4,10 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
-import androidx.viewpager2.adapter.FragmentStateAdapter
 import com.google.android.material.tabs.TabLayoutMediator
 import com.github.kamiiroawase.specialchars.R
-import com.github.kamiiroawase.specialchars.base.App
 import com.github.kamiiroawase.specialchars.databinding.FragmentDuanyuBinding
-import com.github.kamiiroawase.specialchars.view.viewpage.DuanyuliebiaoFragment
+import com.github.kamiiroawase.specialchars.view.adapter.DuanyuPagerAdapter
 
 class DuanyuFragment : BaseFragment() {
     private var _binding: FragmentDuanyuBinding? = null
@@ -47,7 +44,7 @@ class DuanyuFragment : BaseFragment() {
             R.string.yanzi
         )
 
-        val pagerAdapter = DecoratePagerAdapter(this, tabs.size)
+        val pagerAdapter = DuanyuPagerAdapter(this, tabs.size)
 
         binding.viewPager2.adapter = pagerAdapter
         binding.viewPager2.isUserInputEnabled = false
@@ -56,38 +53,5 @@ class DuanyuFragment : BaseFragment() {
         TabLayoutMediator(binding.tabLayout, binding.viewPager2) { tab, position ->
             tab.text = getString(tabs[position])
         }.attach()
-    }
-
-    class DecoratePagerAdapter(
-        fragment: Fragment,
-        private val itemCount: Int
-    ) : FragmentStateAdapter(fragment) {
-        override fun getItemCount() = itemCount
-
-        @Suppress("BooleanLiteralArgument")
-        override fun createFragment(position: Int): Fragment = when (position) {
-            0 -> DuanyuliebiaoFragment.newInstance(
-                App.getStringFromRaw(R.raw.duanyu_duanyu_data)
-            )
-
-            1 -> DuanyuliebiaoFragment.newInstance(
-                App.getStringFromRaw(R.raw.duanyu_tuan_data),
-                true,
-                false
-            )
-
-            2 -> DuanyuliebiaoFragment.newInstance(
-                App.getStringFromRaw(R.raw.duanyu_fenge_data),
-                true
-            )
-
-            3 -> DuanyuliebiaoFragment.newInstance(
-                App.getStringFromRaw(R.raw.duanyu_fuhao_data)
-            )
-
-            else -> DuanyuliebiaoFragment.newInstance(
-                App.getStringFromRaw(R.raw.duanyu_yanzi_data)
-            )
-        }
     }
 }

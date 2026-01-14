@@ -38,6 +38,11 @@ class WodeFragment : BaseFragment() {
         setupClickListener()
     }
 
+    private fun initView() {
+        binding.buttonDangqianbanbenText.text =
+            getString(R.string.dangqianbanben, getVersionName())
+    }
+
     private fun setupClickListener() {
         binding.buttonYonghuxieyi.setOnClickListener {
             startActivity(Intent(requireContext(), WebActivity::class.java))
@@ -50,11 +55,6 @@ class WodeFragment : BaseFragment() {
         binding.buttonYijianfankui.setOnClickListener {
             startActivity(Intent(requireContext(), FeedbackActivity::class.java))
         }
-    }
-
-    private fun initView() {
-        binding.buttonDangqianbanbenText.text =
-            getString(R.string.dangqianbanben, getVersionName())
     }
 
     private fun getVersionName(): String {
